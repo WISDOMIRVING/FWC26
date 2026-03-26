@@ -20,7 +20,10 @@ const userId =
   Math.random().toString(36).substring(7);
 localStorage.setItem("airdrop_user_id", userId);
 
-const API_BASE_URL = "http://localhost:5000";
+// Use relative URL when served from the same origin, or fallback for local dev
+const API_BASE_URL = window.location.hostname === "localhost"
+  ? "http://localhost:5000"
+  : "";
 const totalTasks = tasks.length;
 
 function updateProgress() {
@@ -30,10 +33,24 @@ function updateProgress() {
   document.getElementById("progressPercent").innerText = `${percent}%`;
 }
 
+function markTaskComplete(button, taskConfig) {
+  button.innerText = "Completed";
+  button.style.backgroundColor = "#28a745";
+  button.disabled = true;
+
+  completedCount++;
+  updateProgress();
+
+  if (taskConfig.nextId) {
+    const nextTask = document.getElementById(taskConfig.nextId);
+    if (nextTask) nextTask.classList.remove("locked");
+  }
+}
+
 async function completeTask(action) {
   if (action === "claim") {
     alert(
-      "Congratulations !!! Completed!!!\n\nYou have Successful Secured Your Spot\nDon't Forget To Submit Your Sol Wallet In The Comment Section",
+      "Congratulations !!! Completed!!!\n\nYou have Successfully Secured Your Spot\nDon't Forget To Submit Your Sol Wallet In The Comment Section",
     );
     return;
   }
@@ -48,7 +65,6 @@ async function completeTask(action) {
   const button = document.querySelector(
     `button[onclick="completeTask('${action}')"]`,
   );
-  const currentTaskDiv = button.closest(".task");
 
   if (button.disabled) return;
 
@@ -72,22 +88,11 @@ async function completeTask(action) {
     const updatedTasks = await response.json();
     console.log("Sync successful:", updatedTasks);
 
-    // Only mark as completed if the network request succeeds
-    button.innerText = "Completed";
-    button.style.backgroundColor = "#28a745";
-    button.disabled = true;
-
-    completedCount++;
-    updateProgress();
-
-    if (taskConfig.nextId) {
-      const nextTask = document.getElementById(taskConfig.nextId);
-      if (nextTask) nextTask.classList.remove("locked");
-    }
+    markTaskComplete(button, taskConfig);
   } catch (error) {
-    console.error("Failed to sync with server:", error);
-    button.innerText = "Try Again";
-    button.disabled = false;
+    console.warn("Backend unavailable, completing task locally:", error.message);
+    // Complete the task client-side even if the backend is unreachable
+    markTaskComplete(button, taskConfig);
   }
 }
 
