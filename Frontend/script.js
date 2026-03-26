@@ -6,9 +6,9 @@ const tasks = [
     url: "https://x.com/fifaworldc26/status/2024518300470776044?s=20",
   },
   {
-    action: "followed_fb",
+    action: "retweeted",
     nextId: "postTask",
-    url: "https://www.facebook.com/share/1ZbeJyqQek/",
+    url: "https://x.com/fifaworldc26/status/2024518300470776044?s=20",
   },
   { action: "joined", nextId: "claimTask", url: "https://t.me/fwcup26" },
 ];
